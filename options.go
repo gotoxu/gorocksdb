@@ -3,6 +3,7 @@ package gorocksdb
 // #include "rocksdb/c.h"
 // #include "gorocksdb.h"
 import "C"
+
 import (
 	"errors"
 	"unsafe"
@@ -690,7 +691,7 @@ func (opts *Options) SetDeleteObsoleteFilesPeriodMicros(value uint64) {
 	C.rocksdb_options_set_delete_obsolete_files_period_micros(opts.c, C.uint64_t(value))
 }
 
-// SetMaxBackgroundCompactions sets the maximum number of
+// NOT SUPPORTED ANYMORE: SetMaxBackgroundCompactions sets the maximum number of
 // concurrent background jobs, submitted to
 // the default LOW priority thread pool
 // Default: 1
@@ -698,7 +699,21 @@ func (opts *Options) SetMaxBackgroundCompactions(value int) {
 	C.rocksdb_options_set_max_background_compactions(opts.c, C.int(value))
 }
 
-// SetMaxBackgroundFlushes sets the maximum number of
+// SetMaxBackgroundJobs sets maximum number of concurrent background jobs (compactions and flushes).
+// Default: 2
+func (opts *Options) SetMaxBackgroundJobs(value int) {
+	C.rocksdb_options_set_max_background_jobs(opts.c, C.int(value))
+}
+
+// SetMaxSubCompactions sets the maximum number of threads that will
+// concurrently perform a compaction job by breaking it into multiple,
+// smaller ones that are run simultaneously.
+// Default: 1
+func (opts *Options) SetMaxSubCompactions(value uint32) {
+	C.rocksdb_options_set_max_subcompactions(opts.c, C.uint32_t(value))
+}
+
+// NOT SUPPORTED ANYMORE: SetMaxBackgroundFlushes sets the maximum number of
 // concurrent background memtable flush jobs, submitted to
 // the HIGH priority thread pool.
 //

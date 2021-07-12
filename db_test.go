@@ -132,6 +132,8 @@ func newTestDB(t *testing.T, name string, applyOpts func(opts *Options)) *DB {
 	rateLimiter := NewRateLimiter(1024, 100*1000, 10)
 	opts.SetRateLimiter(rateLimiter)
 	opts.SetCreateIfMissing(true)
+	opts.SetMaxBackgroundJobs(8)
+	opts.SetMaxSubCompactions(2)
 	if applyOpts != nil {
 		applyOpts(opts)
 	}
