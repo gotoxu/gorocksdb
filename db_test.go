@@ -9,8 +9,14 @@ import (
 )
 
 func TestOpenDb(t *testing.T) {
-	db := newTestDB(t, "TestOpenDb", nil)
+	db := newTestDB(t, "TestOpenDb", func(opts *Options) {
+		titan := NewDefaultTitanOptions()
+		opts.titan = titan
+	})
 	defer db.Close()
+
+	err := db.Put(NewDefaultWriteOptions(), []byte("mykey"), []byte("myvalue"))
+	ensure.Nil(t, err)
 }
 
 func TestDBCRUD(t *testing.T) {

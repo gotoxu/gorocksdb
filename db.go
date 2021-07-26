@@ -2,7 +2,9 @@ package gorocksdb
 
 // #include <stdlib.h>
 // #include "rocksdb/c.h"
+// #include "titan/c.h"
 import "C"
+
 import (
 	"errors"
 	"fmt"
@@ -30,6 +32,18 @@ func OpenDb(opts *Options, name string) (*DB, error) {
 		cName = C.CString(name)
 	)
 	defer C.free(unsafe.Pointer(cName))
+
+	if opts.titan != nil {
+		C.titandb_options_set_rocksdb_options(opts.titan.c, opts.c)
+		db := C.titandb_open(cName, opts.titan.c, &cErr)
+		if cErr != nil {
+			defer C.titandb_free(unsafe.Pointer(cErr))
+			return nil, errors.New(C.GoString(cErr))
+		}
+
+		return &DB{name: name, opts: opts, c: db}, nil
+	}
+
 	db := C.rocksdb_open(opts.c, cName, &cErr)
 	if cErr != nil {
 		defer C.rocksdb_free(unsafe.Pointer(cErr))
@@ -888,9 +902,7 @@ func (db *DB) IngestExternalFileCF(handle *ColumnFamilyHandle, filePaths []strin
 
 // NewCheckpoint creates a new Checkpoint for this db.
 func (db *DB) NewCheckpoint() (*Checkpoint, error) {
-	var (
-		cErr *C.char
-	)
+	var cErr *C.char
 	cCheckpoint := C.rocksdb_checkpoint_object_create(
 		db.c, &cErr,
 	)

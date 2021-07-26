@@ -1,6 +1,7 @@
 package gorocksdb
 
 // #include "rocksdb/c.h"
+// #include "titan/c.h"
 // #include "gorocksdb.h"
 import "C"
 
@@ -75,8 +76,9 @@ type Options struct {
 	c *C.rocksdb_options_t
 
 	// Hold references for GC.
-	env  *Env
-	bbto *BlockBasedTableOptions
+	env   *Env
+	bbto  *BlockBasedTableOptions
+	titan *TitanOptions
 
 	// We keep these so we can free their memory in Destroy.
 	ccmp *C.rocksdb_comparator_t
@@ -117,6 +119,12 @@ func GetOptionsFromString(base *Options, optStr string) (*Options, error) {
 	}
 
 	return newOpt, nil
+}
+
+func (opts *Options) SetTitanDBOptions(options *TitanOptions) {
+	titan := &TitanOptions{}
+	titan.c = C.titandb_options_copy(options.c)
+	opts.titan = titan
 }
 
 // -------------------
